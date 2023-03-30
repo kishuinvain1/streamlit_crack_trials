@@ -42,9 +42,9 @@ def loadSegFormModel():
 	
 def segFormCrack(cl, x, y, w, h, cnf, saved_image):
     print(".....inside segFormCrack......")
-    #img = cv2.imread(saved_image)
-    img = cv2.cvtColor(saved_image,cv2.COLOR_BGR2RGB)
-    print(img.shape)
+    img = cv2.imread(saved_image)
+    img = cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
+    #print(img.shape)
     x = int(x)
     y = int(y)
     w = int(w)
@@ -103,12 +103,12 @@ def main():
         rf2 = Roboflow(api_key="uhDFc9G6MKjrEvbfHt6B")
         project2 = rf2.workspace().project("fleetguard")
         model2 = project2.version(1).model
-        results = predict(model2, svd_img)
+        results = predict(model2, "main_image.jpg")
         #results = predict(model2, url)
         print("Prediction Results are...")	
         print(results)
         if len(results['predictions']) == 0:
-            st.image(svd_img.name)
+            st.image(svd_img)
             st.write("No object is detected")
         else:
 		
@@ -127,7 +127,7 @@ def main():
             #st.write(cl)
             #st.write(cnf)
             if(cl == "Crack" or cl == "No-Crack"):
-                sem_seg_res = segFormCrack(cl, x, y, w, h, cnf, svd_img)
+                sem_seg_res = segFormCrack(cl, x, y, w, h, cnf, "main_image.jpg")
 
     elif(result and option == "Zoomed-in"):
         st.write('Calculating results...')
