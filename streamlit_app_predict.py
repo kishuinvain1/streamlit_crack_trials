@@ -43,13 +43,13 @@ def loadSegFormModel():
 def segFormCrack(cl, x, y, w, h, cnf, saved_image):
     print(".....inside segFormCrack......")
     img = cv2.imread(saved_image)
-    #img = cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
+    img = cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
     #print(img.shape)
     x = int(x)
     y = int(y)
     w = int(w)
     h = int(h)
-    roi = img[y-h//2:y+h//2, x-w//2:x+w//2, :]
+    roi = img[y-h//2+10:y+h//2-10, x-w//2+10:x+w//2-10, :]
     #st.image(roi, caption="ROI")
     cv2.imwrite("saved_ROI.jpg", roi)
     segform_model = loadSegFormModel()
