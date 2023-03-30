@@ -25,6 +25,7 @@ def load_image():
         path = os.path.abspath(name)
         print("abs path")
         print(path)
+       
     return path, opencv_image
        
 
@@ -38,8 +39,10 @@ def loadSegFormModel():
     return model
 	
 def segFormCrack(cl, x, y, w, h, cnf, saved_image):
+    print(".....inside segFormCrack......")
     #img = cv2.imread(saved_image)
     img = cv2.cvtColor(saved_image,cv2.COLOR_BGR2RGB)
+    print(img.shape)
     x = int(x)
     y = int(y)
     w = int(w)
