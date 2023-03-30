@@ -19,7 +19,6 @@ def load_image():
     if uploaded_file is not None:
         file_bytes = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
         opencv_image = cv2.imdecode(file_bytes, 1)
-        opencv_image = cv2.cvtColor(opencv_image,cv2.COLOR_BGR2RGB)
         image_data = uploaded_file.getvalue() 
         #st.image(image_data)
         name = uploaded_file.name
