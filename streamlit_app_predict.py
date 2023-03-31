@@ -37,7 +37,8 @@ def loadSegFormModel():
     print("...loading...segformer..")
     rf = Roboflow(api_key="uhDFc9G6MKjrEvbfHt6B")
     project = rf.workspace().project("fleetguardcrack")
-    model = project.version(1).model
+    #model = project.version(1).model
+    model = project.version(4).model
     return model
 	
 def segFormCrack(cl, x, y, w, h, cnf, saved_image):
