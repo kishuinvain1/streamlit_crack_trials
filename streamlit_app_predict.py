@@ -87,7 +87,7 @@ def predict(model, url):
 	
 	
 def main():
-    st.title('Crack Detection Demo')
+    st.title('Crack Detection Trials')
     option = st.selectbox('Image Type',('Normal', 'Zoomed-in'))
    
     #Model api for fleet-crack trained on 25_03_23	
