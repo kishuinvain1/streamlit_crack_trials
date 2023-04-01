@@ -193,7 +193,7 @@ def main():
             #st.write(cl)
             #st.write(cnf)
             if(cl == "Non-Broken"):
-                sem_seg_res = segFormCrack(cl, x, y, w, h, cnf, "main_image.jpg")
+                sem_seg_res = segFormCrack(cl, x, y, w, h, cnf, "main_image.jpg", zoomin_bias)
 
     elif(result and option == "Zoomed-in"):
         st.write('Calculating results...')
