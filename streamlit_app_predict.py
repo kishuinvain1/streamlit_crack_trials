@@ -62,9 +62,11 @@ def segFormCrack(cl, x, y, w, h, cnf, saved_image, bias):
     y = int(y)
     w = int(w)
     h = int(h)
-    bias = int(bias)
+    zoomin_bias = st.number_input('Zoomin Bias')
+    bias = int(zoomin_bias)
     roi = img[y-h//2+bias:y+h//2-bias, x-w//2+bias:x+w//2-bias, :]
     st.image(roi, caption="ROI")
+    
     cv2.imwrite("saved_ROI.jpg", roi)
     segform_model = loadSegFormModel()
     preds = segform_model.predict("saved_ROI.jpg")
@@ -139,7 +141,7 @@ def main():
     #model = project.version(1).model
      
     image, svd_img = load_image()
-    zoomin_bias = st.number_input('Zoomin Bias')
+    
     #st.write('Enter the image URL')
     #url = st.text_input('URL', '')
     result = st.button('Predict')
@@ -189,7 +191,7 @@ def main():
             #st.write(cl)
             #st.write(cnf)
             if(cl == "Non-Broken"):
-                sem_seg_res = segFormCrack(cl, x, y, w, h, cnf, "main_image.jpg", zoomin_bias)
+                sem_seg_res = segFormCrack(cl, x, y, w, h, cnf, "main_image.jpg")
 
     elif(result and option == "Zoomed-in"):
         st.write('Calculating results...')
