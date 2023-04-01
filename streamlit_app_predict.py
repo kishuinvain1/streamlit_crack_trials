@@ -1,3 +1,4 @@
+import io
 import streamlit as st
 from roboflow import Roboflow
 from pathlib import Path
@@ -5,6 +6,7 @@ import os
 from PIL import Image
 import cv2
 import numpy as np
+import base64
 
 
 
@@ -40,8 +42,18 @@ def loadSegFormModel():
     #model = project.version(1).model
     model = project.version(4).model
     return model
+
+# Take in base64 string and return PIL image
+def stringToImage(base64_string):
+    imgdata = base64.b64decode(base64_string)
+    return Image.open(io.BytesIO(imgdata))
+
+# convert PIL Image to an RGB image( technically a numpy array ) that's compatible with opencv
+def toRGB(image):
+    return np.array(image)
 	
-def segFormCrack(cl, x, y, w, h, cnf, saved_image):
+def segFormCrack(cl, x, y, w, h, cnf, saved_image, bias):
+
     print(".....inside segFormCrack......")
     img = cv2.imread(saved_image)
     img = cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
@@ -50,14 +62,44 @@ def segFormCrack(cl, x, y, w, h, cnf, saved_image):
     y = int(y)
     w = int(w)
     h = int(h)
-    bias = 0
+    bias = int(bias)
     roi = img[y-h//2+bias:y+h//2-bias, x-w//2+bias:x+w//2-bias, :]
-    #st.image(roi, caption="ROI")
+    st.image(roi, caption="ROI")
     cv2.imwrite("saved_ROI.jpg", roi)
     segform_model = loadSegFormModel()
-    preds = segform_model.predict("saved_ROI.jpg").save("crack_pred.jpg")
-    crck_pred = Image.open('crack_pred.jpg')
-    st.image(crck_pred, caption='crack localization')
+    preds = segform_model.predict("saved_ROI.jpg")
+    print("segmentation results are ")
+    seg_mask = preds[0]['segmentation_mask']
+	
+    
+	
+    print(seg_mask)
+    #seg_mask_read = cv2.imread(seg_mask, 0)
+    #cv2.imwrite("seg_mask.jpg", seg_mask_read)
+    #seg_img = Image.open("seg_mask.jpg")
+    im_bytes = base64.b64decode(seg_mask)
+    im_arr = np.frombuffer(im_bytes, dtype=np.uint8)  # im_arr is one-dim Numpy array
+    
+    seg_mask_image = cv2.imdecode(im_arr, 0)
+    print(seg_mask_image)
+    nz_cmp = np.sum(seg_mask_image)
+    print("non-zero is......................................")
+    print(nz_cmp)
+    
+        
+
+    #pil_image = stringToImage(seg_mask)
+    #seg_mask_image = toRGB(pil_image)
+    
+    #st.image(seg_mask_image, caption='segmentation mask')
+    
+    
+    if(nz_cmp > 10):
+        preds = segform_model.predict("saved_ROI.jpg").save("crack_pred.jpg")
+        crck_pred = Image.open('crack_pred.jpg')
+        st.image(crck_pred, caption='crack localization')
+    else:
+        st.write("No Crack Detected")
 	
 def drawBoundingBox(saved_image ,x, y, w, h, cl, cf):
     #img = Image.open(saved_image)
@@ -87,8 +129,9 @@ def predict(model, url):
 	
 	
 def main():
-    st.title('Crack Detection Trials')
+    st.title('Crack Detection Final')
     option = st.selectbox('Image Type',('Normal', 'Zoomed-in'))
+	
    
     #Model api for fleet-crack trained on 25_03_23	
     #rf = Roboflow(api_key="SNxIPCnRCYWXUM9lBAp4")
@@ -96,23 +139,31 @@ def main():
     #model = project.version(1).model
      
     image, svd_img = load_image()
+    zoomin_bias = st.number_input('Zoomin Bias')
     #st.write('Enter the image URL')
     #url = st.text_input('URL', '')
     result = st.button('Predict')
     if(result and option == "Normal"):
         st.write('Calculating results...')
         #Model api for FleetGuard trained on 27_03_23
-        rf2 = Roboflow(api_key="uhDFc9G6MKjrEvbfHt6B")
-        project2 = rf2.workspace().project("fleetguard")
-        model2 = project2.version(1).model
+        #rf2 = Roboflow(api_key="uhDFc9G6MKjrEvbfHt6B")
+        #project2 = rf2.workspace().project("fleetguard")
+        #model2 = project2.version(1).model
 	
         #Model api for FleetGuard trained on 31_03_23
         #rf3 = Roboflow(api_key="pAMgIogxlcl3zF1xSCsE")
         #project3 = rf3.workspace().project("fleetguardobjdet")
         #model3 = project3.version(1).model
 	
+	#Model api for FleetGuard trained on 31_03_23 with 2 classes (broken/non-broken)
+        rf4 = Roboflow(api_key="q3ZrI4IarL2A3pHuOrt2")
+        project4 = rf4.workspace().project("fleetguardobjdet3")
+        model4 = project4.version(4).model
 	
-        results = predict(model2, svd_img)
+	
+	
+	
+        results = predict(model4, svd_img)
         #results = predict(model2, url)
         print("Prediction Results are...")	
         print(results)
@@ -128,6 +179,8 @@ def main():
             h = results['predictions'][0]['height']
             cl = results['predictions'][0]['class']
             cnf = results['predictions'][0]['confidence']
+            if(cl == "Broken" and cnf < 0.8):
+                cl = "Non-Broken"
             print("printing saved image")
             #print(svd_img.name)
 	
@@ -135,15 +188,36 @@ def main():
             drawBoundingBox(svd_img,x, y, w, h, cl, cnf)
             #st.write(cl)
             #st.write(cnf)
-            if(cl == "Crack" or cl == "No-Crack"):
-                sem_seg_res = segFormCrack(cl, x, y, w, h, cnf, "main_image.jpg")
+            if(cl == "Non-Broken"):
+                sem_seg_res = segFormCrack(cl, x, y, w, h, cnf, "main_image.jpg", zoomin_bias)
 
     elif(result and option == "Zoomed-in"):
         st.write('Calculating results...')
         segform_model = loadSegFormModel()
-        preds = segform_model.predict("main_image.jpg").save("crack_pred.jpg")
-        crck_pred = Image.open('crack_pred.jpg')
-        st.image(crck_pred, caption='crack localization')
+        preds = segform_model.predict("main_image.jpg")
+        seg_mask = preds[0]['segmentation_mask']
+	
+    
+	
+        print(seg_mask)
+        #seg_mask_read = cv2.imread(seg_mask, 0)
+        #cv2.imwrite("seg_mask.jpg", seg_mask_read)
+        #seg_img = Image.open("seg_mask.jpg")
+        im_bytes = base64.b64decode(seg_mask)
+        im_arr = np.frombuffer(im_bytes, dtype=np.uint8)  # im_arr is one-dim Numpy array
+    
+        seg_mask_image = cv2.imdecode(im_arr, 0)
+        #print(seg_mask_image)
+        nz_cmp = np.sum(seg_mask_image)
+        print("non-zero is......................................")
+        print(nz_cmp)
+        if(nz_cmp > 10):
+		
+            preds = segform_model.predict("main_image.jpg").save("crack_pred.jpg")
+            crck_pred = Image.open('crack_pred.jpg')
+            st.image(crck_pred, caption='crack localization')
+        else:
+            st.write("No Cracks Detected")
         
   	
                   
