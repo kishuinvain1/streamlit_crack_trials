@@ -129,7 +129,7 @@ def predict(model, url):
 	
 	
 def main():
-    st.title('Crack Detection Final')
+    st.title('Crack Detection Trial')
     option = st.selectbox('Image Type',('Normal', 'Zoomed-in'))
 	
    
