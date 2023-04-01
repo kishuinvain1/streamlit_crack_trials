@@ -52,7 +52,7 @@ def stringToImage(base64_string):
 def toRGB(image):
     return np.array(image)
 	
-def segFormCrack(cl, x, y, w, h, cnf, saved_image):
+def segFormCrack(cl, x, y, w, h, cnf, saved_image, bias):
 
     print(".....inside segFormCrack......")
     img = cv2.imread(saved_image)
@@ -62,8 +62,9 @@ def segFormCrack(cl, x, y, w, h, cnf, saved_image):
     y = int(y)
     w = int(w)
     h = int(h)
-    zoomin_bias = st.number_input('Zoomin Bias')
-    bias = int(zoomin_bias)
+    
+    
+    bias = int(bias)
     roi = img[y-h//2+bias:y+h//2-bias, x-w//2+bias:x+w//2-bias, :]
     st.image(roi, caption="ROI")
     
@@ -141,6 +142,7 @@ def main():
     #model = project.version(1).model
      
     image, svd_img = load_image()
+    zoomin_bias = st.number_input('Zoomin Bias')
     
     #st.write('Enter the image URL')
     #url = st.text_input('URL', '')
