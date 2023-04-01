@@ -52,7 +52,7 @@ def stringToImage(base64_string):
 def toRGB(image):
     return np.array(image)
 	
-def segFormCrack(cl, x, y, w, h, cnf, saved_image, bias):
+def segFormCrack(cl, x, y, w, h, cnf, saved_image):
 
     print(".....inside segFormCrack......")
     img = cv2.imread(saved_image)
