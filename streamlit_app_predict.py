@@ -146,9 +146,9 @@ def main():
     if(result and option == "Normal"):
         st.write('Calculating results...')
         #Model api for FleetGuard trained on 27_03_23
-        #rf2 = Roboflow(api_key="uhDFc9G6MKjrEvbfHt6B")
-        #project2 = rf2.workspace().project("fleetguard")
-        #model2 = project2.version(1).model
+        rf2 = Roboflow(api_key="uhDFc9G6MKjrEvbfHt6B")
+        project2 = rf2.workspace().project("fleetguard")
+        model2 = project2.version(1).model
 	
         #Model api for FleetGuard trained on 31_03_23
         #rf3 = Roboflow(api_key="pAMgIogxlcl3zF1xSCsE")
@@ -156,14 +156,14 @@ def main():
         #model3 = project3.version(1).model
 	
 	#Model api for FleetGuard trained on 31_03_23 with 2 classes (broken/non-broken)
-        rf4 = Roboflow(api_key="q3ZrI4IarL2A3pHuOrt2")
-        project4 = rf4.workspace().project("fleetguardobjdet3")
-        model4 = project4.version(4).model
+        #rf4 = Roboflow(api_key="q3ZrI4IarL2A3pHuOrt2")
+        #project4 = rf4.workspace().project("fleetguardobjdet3")
+        #model4 = project4.version(4).model
 	
 	
 	
 	
-        results = predict(model4, svd_img)
+        results = predict(model2, svd_img)
         #results = predict(model2, url)
         print("Prediction Results are...")	
         print(results)
